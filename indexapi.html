@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>Получение индекса и вывод подробной информации</title>
+</head>
+<body>
+<div id="app" class="container">
+
+  <h1 class="text-center">Вывод подробной информации по индексу</h1>
+  <div class="row">
+    <div v-model="indexGet" class="col-md-6">
+      <label for="index">Введите Индекс</label>
+      <input name="index" type="text" class="form-control" v-model="indexGet">
+      <span style="font-weight:bold;" v-cloak>{{city}}</span><br>
+      <span style="font-weight:bold;" v-cloak>{{region}}</span>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"></script>
+
+<script type="text/javascript">
+  var app = new Vue ({
+    el: '#app',
+    data: {
+      indexGet: '',
+      region: '',
+      city: '',
+    },
+    watch: {
+      indexGet: function(){
+        //Обнуляем при изменении
+        this.city=''
+        //Запускаем поиск только если индекс введен полностью
+        if(this.indexGet.length == 6){
+          this.searchIndexGet()
+        }
+      }
+    },
+    methods:{
+      searchIndexGet: _.debounce(function(){
+        var app = this
+        app.city = "Поиск..."
+        axios.get('https://www.postindexapi.ru/json/' + app.indexGet.substr(0,3) + '/' + app.indexGet + '.json').then(function(response){
+          app.city = 'Город: ' + response.data.City
+          app.region ='Регион: ' + response.data.Region
+        }).catch(function(error){
+          app.indexGet = "Неверный индекс"
+        })
+      },500)
+    },
+  });
+</script>
+</body>
+</html>
